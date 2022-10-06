@@ -1,0 +1,105 @@
+---
+title: "McDonalds Report"
+author: "Ibrahim Alghrabi"
+output: html_document
+date: "2022-10-06"
+knit: (function(input, ...) { rmarkdown::render( input, output_dir = "../" ) })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(reactable)
+library(DataExplorer)
+library(GGally)
+```
+
+# Introduction
+
+In this report, we will be looking at McDonald's menu nutrition values. We will try to show different relations between different nutrition values and calories, and do exploratory data analysis on the dataset provided from kaggle.
+
+# Data
+
+The dataset contains 24 variables, but only 10 will be discussed as shown below.
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+menu_data <- read_csv(here("~/Documents/individual-assignment-2-ibrahim-g7/data/menu.csv"))
+
+menu_data %>% 
+  clean_names() -> menu_data1
+
+menu_data1 %>% 
+  select(category, item, serving_size,
+         calories, total_fat, total_fat_percent_daily_value,
+         carbohydrates, carbohydrates_percent_daily_value,
+         sugars, protein) -> menu_df
+```
+
+| Variable                         | Description                                            |
+|------------------------------------|------------------------------------|
+| category                         | Type of the meal or drink.                             |
+| item                             | Items name.                                            |
+| serving size                     | The size of the meal or drink in oz and gram.          |
+| calories                         | The number of calories in each item.                   |
+| total_fat                        | Total fat in gram in each item.                        |
+| total_fat_percent_daily_value    | Percentage of daily value of fat in serving.           |
+| carbohydrates                    | Carbohydrate content in the item                       |
+| crabohudrate_percent_daily_value | Percentage of daily value of carbohydrates in serving. |
+| sugar                            | Sugar content in each item.                            |
+| protein                          | Protein content in each item.                          |
+
+Checking for missing values:
+
+```{r}
+sum(is.na(menu_df))
+```
+
+Interactive table of the data:
+
+```{r}
+reactable(menu_df)
+```
+
+# EDA
+
+To look at out data we use:
+
+```{r}
+glimpse(menu_data1)
+```
+
+We see the dataset has 260 rows (observation) and 24 colmun (variable). But as mention above, our only concern will be about 10 variable. So after selecting variables of interest, our data will become:
+
+```{r}
+glimpse(menu_df)
+```
+
+Now we only have 10 variables. 3 of which are of type character and the rest are of type double.
+
+Lets take a look at the distribution of the numerical variables:
+
+```{r}
+menu_df %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram(bins=30) 
+```
+
+We can see that both carbohydrates, and carbohydrates %daily value have symmetrical distribution, it might be safe to assume them to be normal. Where the other distributions are right skewed distribution 
+
+
+Lets do correlation analysis: 
+```{r, warning=FALSE, message=FALSE}
+ggcorr(menu_df, lable=TRUE, size = 4)
+```
+We can note that calories have positive correlation with all other numerical variables. Although sugar seems to have the lowest correlation with calories which is an interesting fact. Sugar have the lowest correlation to the calories of the items. 
+
+
+# Conclusion
+In conclusion, we explored some nutrition values in McDonald menu, and have shown that distribution of many variables some of which are right skewed. Also, we have done the correlation analysis and it shows that  
+
+
